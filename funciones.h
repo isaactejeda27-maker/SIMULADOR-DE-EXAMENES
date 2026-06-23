@@ -1,12 +1,15 @@
 #ifndef FUNCIONES_H   // 1. Corregido: "Si NO está definido..."
 #define FUNCIONES_H
 
+#include <iostream>
 #include <string>
 #include <vector> // Necesario si decides usar vectores dinámicos
+#include <conio.h>
 
 // Usamos el espacio de nombres estándar para poder usar 'string' y 'vector'
 using std::string;
 using std::vector;
+using std::cout;
 
 struct pregunta {
     string p;       // Texto de la pregunta
@@ -36,6 +39,14 @@ struct examen {
     
     float promedio;      // Calificación final obtenida
 };                  
+
+enum class Key {
+    UP, DOWN, ENTER, NONE
+};
+
+Key obtenerTecla();
+
+void dibujarMenuPrincipal(const vector<string>& opciones, int seleccionada);
 
 // Declaración de tus funciones aquí abajo, por ejemplo:
 // void crearExamen(examen &e);
