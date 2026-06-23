@@ -1,10 +1,11 @@
-#include "funciones.h"
-#include <fstream>
-#include <sstream>
-#include <direct.h>
-#include <cctype>
-#include <io.h>
+#include "funciones.h" //libreria para funciones
+#include <fstream> //libreria para manejo de textos
+#include <sstream> //manejo de cadenas y conversiones
+#include <direct.h> //control de directorios en windows
+#include <cctype> //manejo de caracteres en la tabla ASCII
+#include <io.h> //archivos de bajo nivel, solo para windows
 
+//nombramiento de invocacion de los espacios de texto
 using std::cin;
 using std::getline;
 using std::ofstream;
@@ -12,6 +13,7 @@ using std::ifstream;
 using std::stringstream;
 using std::to_string;
 
+//copiamos textos desde el archivo caracter por caracter, Mas seguro para el buffer
 static void copiarTexto(const string& src, char* dst, int maxTam) {
     int copiados = 0;
     for (int i = 0; i < maxTam - 1 && i < (int)src.size(); ++i) {
@@ -21,6 +23,7 @@ static void copiarTexto(const string& src, char* dst, int maxTam) {
     dst[copiados] = '\0';
 }
 
+//creamos un nodo en la memoria dinamica con sus punteros en nulos
 static nodo* crearNodo(const pregunta& info) {
     nodo* nuevo = new nodo;
     nuevo->info = info;
@@ -29,6 +32,7 @@ static nodo* crearNodo(const pregunta& info) {
     return nuevo;
 }
 
+//libreracion de la memoria dinamica
 static void liberarLista(nodo* inicio) {
     while (inicio != nullptr) {
         nodo* siguiente = inicio->sig;
@@ -37,6 +41,7 @@ static void liberarLista(nodo* inicio) {
     }
 }
 
+//insercion de nodo a la lista
 static void anadirNodo(nodo*& inicio, nodo*& fin, const pregunta& info) {
     nodo* nuevo = crearNodo(info);
     if (inicio == nullptr) {
@@ -261,19 +266,19 @@ void generarExamen() {
 }
 
 // Carga el examen en una lista doblemente enlazada.
-// Complejidad: O(n) donde n es la cantidad de reactivos (preguntas) en el archivo.
-// Para un estudiante de ingeniería en sistemas, este algoritmo toma aproximadamente 1-2 horas
-// si ya conoce la lectura de archivos y el manejo básico de punteros.
 static bool cargarExamenDesdeArchivo(const string& ruta, nodo*& inicio, nodo*& fin, int& totalPuntos) {
+    //Inicializamos 
     inicio = fin = nullptr;
     totalPuntos = 0;
 
+    //validamos si se pudo leer el archivo
     ifstream archivo(ruta);
     if (!archivo) return false;
 
+    //empleo de una cadena string para lectura de reactivos
     string linea;
-    while (getline(archivo, linea)) {
-        if (linea.rfind(":p;", 0) != 0) {
+    while (getline(archivo, linea)) { 
+        if (linea.rfind(":p;", 0) != 0) { //encontrar un reactivo
             continue;
         }
 
@@ -281,16 +286,18 @@ static bool cargarExamenDesdeArchivo(const string& ruta, nodo*& inicio, nodo*& f
             continue; // Cabecera del examen, no es un reactivo.
         }
 
+        //inicializamos a un dato tipo pregunta
         pregunta preguntaActual{};
         copiarTexto(linea.substr(3), preguntaActual.p, MAX_TEXTO_P);
         preguntaActual.s = 0;
         preguntaActual.r = 0;
         preguntaActual.puntos = 0;
 
+
         for (int i = 1; i <= 4; ++i) {
             if (!getline(archivo, linea)) break;
             string prefix = ":op" + to_string(i) + ";";
-            if (linea.rfind(prefix, 0) == 0) {
+            if (linea.rfind(prefix, 0) == 0) { 
                 const string texto = linea.substr(prefix.size());
                 if (i == 1) copiarTexto(texto, preguntaActual.op1, MAX_TEXTO_OP);
                 if (i == 2) copiarTexto(texto, preguntaActual.op2, MAX_TEXTO_OP);
