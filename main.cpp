@@ -7,14 +7,13 @@ using namespace std;
 int main(){
 
     vector<string> opciones = {
-        "Opcion 1",
-        "Opcion 2",
-        "Opcion 3",
-        "Salir"
+        "GENERAR UN EXAMEN",
+        "MODIFICAR UN EXAMEN",
+        "APLICAR UN EXAMEN",
+        "SALIR"
     };
 
     int seleccionada = 0;
-
     bool ejecutando = true;
 
     while (ejecutando) {
@@ -30,18 +29,23 @@ int main(){
                 if(seleccionada < opciones.size() - 1) seleccionada++;
                 break;
             case Key::ENTER:
-                cout << "\nSe selecciono la opcion " << opciones[seleccionada] << "\n";
-                if (opciones[seleccionada] == "Salir") ejecutando = false;
-                else{ 
-                    cout << "Presiona Enter para continuar";
-                    cin.ignore();
+                if (opciones[seleccionada] == "SALIR") {
+                    ejecutando = false;
+                } else if (opciones[seleccionada] == "GENERAR UN EXAMEN") {
+                    generarExamen();
+                } else if (opciones[seleccionada] == "MODIFICAR UN EXAMEN") {
+                    modificarExamen();
+                } else if (opciones[seleccionada] == "APLICAR UN EXAMEN") {
+                    aplicarExamen();
+                } else {
+                    cout << "\nOpcion en desarrollo: " << opciones[seleccionada] << "\n";
+                    cout << "Presiona cualquier tecla para continuar...";
+                    getch();
                 }
-            break;
+                break;
             default:
-            break;
-
+                break;
         }
-
     }
 
     return 0;

@@ -1,55 +1,52 @@
-#ifndef FUNCIONES_H   // 1. Corregido: "Si NO está definido..."
+#ifndef FUNCIONES_H   
 #define FUNCIONES_H
 
 #include <iostream>
 #include <string>
-#include <vector> // Necesario si decides usar vectores dinámicos
+#include <vector> 
 #include <conio.h>
 
-// Usamos el espacio de nombres estándar para poder usar 'string' y 'vector'
 using std::string;
 using std::vector;
 using std::cout;
 
-struct pregunta {
-    string p;       // Texto de la pregunta
-    string op1;     // Opción 1
-    string op2;     // Opción 2
-    string op3;     // Opción 3
-    char s;         // Opción seleccionada por el usuario
-    char r;         // Respuesta correcta ('a', 'b', 'c')
-    int puntos;     // Puntos que otorga esta pregunta
-    int numpre;     // Número de la pregunta
-};     
+#define MAX_TEXTO_P 150
+#define MAX_TEXTO_OP 50
 
-struct nodo { //nodo para movernos en las preguntas
+struct pregunta{
+    char p[MAX_TEXTO_P];
+    char op1[MAX_TEXTO_OP];
+    char op2[MAX_TEXTO_OP];
+    char op3[MAX_TEXTO_OP];
+    char op4[MAX_TEXTO_OP];
+    int s;         
+    int r;          
+    int puntos;
+    int numpre;
+};
 
+struct examen {
+    string nombre;
+    vector<pregunta> preguntas;
+    int totPuntos;
+};
+
+// Nodo para la lista doblemente enlazada de preguntas
+struct nodo {
     pregunta info;
     nodo* sig;
     nodo* atras;
 };
 
-struct examen {
-    int totpre;          // Total de preguntas del examen
-    int totpuntos;       // Puntos máximos posibles
-    string nombre;       // Nombre del alumno o del examen
-    
-    // 2. Corregido: Ahora el examen puede guardar una lista de múltiples preguntas
-    vector<pregunta> reactivos; 
-    
-    float promedio;      // Calificación final obtenida
-};                  
-
 enum class Key {
-    UP, DOWN, ENTER, NONE
+    UP, DOWN, LEFT, RIGHT, ENTER, NONE
 };
 
+// Declaraciones de funciones
 Key obtenerTecla();
-
 void dibujarMenuPrincipal(const vector<string>& opciones, int seleccionada);
-
-// Declaración de tus funciones aquí abajo, por ejemplo:
-// void crearExamen(examen &e);
-// void calificarExamen(examen &e);
+void generarExamen();
+void modificarExamen();
+void aplicarExamen();
 
 #endif // FUNCIONES_H

@@ -1,0 +1,18 @@
+:p;EXAMEN ejemplo2
+
+:p;Como se dice Hola en ingles?
+:op1;Hello
+:op2;hola
+:op3;ss
+:op4;s
+:r;op1
+10.
+
+:p;Como me llamo
+:op1;isaac
+:op2;Tejeda
+:op3;Quezada
+:op4;Tas
+:r;op1
+10.
+

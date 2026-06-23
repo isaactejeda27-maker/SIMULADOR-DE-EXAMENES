@@ -1,0 +1,10 @@
+:p;EXAMEN ejemplo
+
+:p;Hola
+:op1;halo
+:op2;helo
+:op3;ed
+:op4;ami
+:r;op2
+1.
+
