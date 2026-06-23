@@ -17,7 +17,14 @@ struct pregunta {
     char r;         // Respuesta correcta ('a', 'b', 'c')
     int puntos;     // Puntos que otorga esta pregunta
     int numpre;     // Número de la pregunta
-};                  
+};     
+
+struct nodo { //nodo para movernos en las preguntas
+
+    pregunta info;
+    nodo* sig;
+    nodo* atras;
+};
 
 struct examen {
     int totpre;          // Total de preguntas del examen
