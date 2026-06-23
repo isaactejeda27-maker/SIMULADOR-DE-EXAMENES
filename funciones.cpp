@@ -111,43 +111,31 @@ static int contarPreguntas(nodo* inicio) {
     return total;
 }
 
-static int leerTeclaConFlechas() {
-    int c = getch();
-    if (c == 224 || c == 0) {
-        c = getch();
-        if (c == 72) return 1; // UP
-        if (c == 80) return 2; // DOWN
-        if (c == 75) return 3; // LEFT
-        if (c == 77) return 4; // RIGHT
-        return 0;
+Key obtenerTecla() {
+    int c = _getch();
+    if (c == 224) {
+        c = _getch();
+        if (c == 72) return Key::UP;
+        if (c == 80) return Key::DOWN;
+        if (c == 75) return Key::LEFT;
+        if (c == 77) return Key::RIGHT;
+    } else if (c == '\r' || c == '\n') {
+        return Key::ENTER;
     }
-    return c;
-}
-
-Key obtenerTecla(){
-
-    int c = getch();
-
-    if(c == 224){
-        c = getch();
-        if(c == 72) return Key::UP;
-        if(c == 80) return Key::DOWN;
-    }
-    else if (c == '\r' || c == '\n') return Key::ENTER;
     return Key::NONE;
-}
+}   
 
-void dibujarMenuPrincipal(const vector<string>& opciones, int seleccionada){
-    cout << "\033[2J\033[H"; //Limpia la pantalla y reinicia el cursor
-
+void dibujarMenuPrincipal(const vector<string>& opciones, int seleccionada) {
+    limpiarPantalla();
     cout << "|=========SIMULADOR DE EXAMENES========|\n";
     cout << "|----------------MENU------------------|\n";
 
-    for(int i = 0; i < opciones.size(); ++i){
-        if(i == seleccionada) cout << "\033[7m > " << opciones[i] << " \033[0m\n"; // Resalta la opcion activa
-        else cout << "  " << opciones[i] << '\n';
+    for (size_t i = 0; i < opciones.size(); ++i) {
+        if (i == seleccionada)
+            cout << "\033[7m > " << opciones[i] << " \033[0m\n";
+        else
+            cout << "  " << opciones[i] << "\n";
     }
-    
 }
 
 void generarExamen() {
@@ -432,7 +420,7 @@ void modificarExamen() {
     if (!cargarExamenDesdeArchivo(ruta, inicio, fin, totalPuntos)) {
         cout << "No se pudo cargar el examen.\n";
         cout << "Presiona cualquier tecla para volver...";
-        getch();
+        _getch();
         liberarLista(inicio);
         return;
     }
@@ -440,38 +428,68 @@ void modificarExamen() {
     nodo* actual = inicio;
     int indice = 1;
     const int total = contarPreguntas(inicio);
+    int seleccionMenu = 0; // 0: editar, 1: guardar, 2: anterior, 3: siguiente, 4: salir
 
     while (true) {
-        mostrarPreguntaParaEdicion(actual, indice, total);
-        int tecla = leerTeclaConFlechas();
-        if (tecla == 3 && actual->atras != nullptr) {
-            actual = actual->atras;
-            --indice;
-            continue;
-        }
-        if (tecla == 4 && actual->sig != nullptr) {
-            actual = actual->sig;
-            ++indice;
-            continue;
+        dibujarMenuModificacion(actual, indice, total, seleccionMenu);
+        Key tecla = obtenerTecla();
+
+        switch (tecla) {
+            case Key::UP:
+                if (seleccionMenu > 0) --seleccionMenu;
+                break;
+            case Key::DOWN:
+                if (seleccionMenu < 4) ++seleccionMenu;
+                break;
+            case Key::LEFT:
+                if (actual->atras != nullptr) {
+                    actual = actual->atras;
+                    --indice;
+                    seleccionMenu = 0;
+                }
+                break;
+            case Key::RIGHT:
+                if (actual->sig != nullptr) {
+                    actual = actual->sig;
+                    ++indice;
+                    seleccionMenu = 0;
+                }
+                break;
+            case Key::ENTER:
+                if (seleccionMenu == 0) {
+                    // Editar la pregunta actual (ventana de texto normal)
+                    editarPregunta(actual);
+                } else if (seleccionMenu == 1) {
+                    // Guardar
+                    if (guardarExamenAArchivo(ruta, inicio)) {
+                        cout << "Examen guardado correctamente.\n";
+                    } else {
+                        cout << "Error al guardar.\n";
+                    }
+                    cout << "Presiona cualquier tecla para continuar...";
+                    _getch();
+                } else if (seleccionMenu == 2) {
+                    if (actual->atras != nullptr) {
+                        actual = actual->atras;
+                        --indice;
+                        seleccionMenu = 0;
+                    }
+                } else if (seleccionMenu == 3) {
+                    if (actual->sig != nullptr) {
+                        actual = actual->sig;
+                        ++indice;
+                        seleccionMenu = 0;
+                    }
+                } else if (seleccionMenu == 4) {
+                    // Salir sin guardar
+                    break;
+                }
+                break;
+            default:
+                break;
         }
 
-        if (tecla == 'e' || tecla == 'E') {
-            editarPregunta(actual);
-            continue;
-        }
-        if (tecla == 'g' || tecla == 'G') {
-            if (guardarExamenAArchivo(ruta, inicio)) {
-                cout << "Examen guardado correctamente.\n";
-            } else {
-                cout << "Error al guardar el examen.\n";
-            }
-            cout << "Presiona cualquier tecla para volver...";
-            getch();
-            break;
-        }
-        if (tecla == 's' || tecla == 'S') {
-            break;
-        }
+        if (tecla == Key::ENTER && seleccionMenu == 4) break; // salir del bucle
     }
 
     liberarLista(inicio);
@@ -512,7 +530,7 @@ void aplicarExamen() {
     if (!cargarExamenDesdeArchivo(ruta, inicio, fin, totalPuntos)) {
         cout << "No se pudo cargar el examen.\n";
         cout << "Presiona cualquier tecla para volver...";
-        getch();
+        _getch();
         liberarLista(inicio);
         return;
     }
@@ -520,30 +538,49 @@ void aplicarExamen() {
     nodo* actual = inicio;
     int indice = 1;
     const int total = contarPreguntas(inicio);
+    int cursor = 0;  
 
     while (true) {
-        mostrarPreguntaParaAplicacion(actual, indice, total);
-        int tecla = leerTeclaConFlechas();
-        if (tecla == 3 && actual->atras != nullptr) {
-            actual = actual->atras;
-            --indice;
-            continue;
-        }
-        if (tecla == 4 && actual->sig != nullptr) {
-            actual = actual->sig;
-            ++indice;
-            continue;
-        }
+        dibujarMenuAplicacion(actual, indice, total, cursor);
+        Key tecla = obtenerTecla();
 
-        if (tecla >= '1' && tecla <= '4') {
-            actual->info.s = tecla - '0';
-            continue;
-        }
-        if (tecla == 'f' || tecla == 'F') {
-            break;
+        switch (tecla) {
+            case Key::UP:
+                if (cursor > 0) --cursor;
+                break;
+            case Key::DOWN:
+                if (cursor < 4) ++cursor;
+                break;
+            case Key::LEFT:
+                if (actual->atras != nullptr) {
+                    actual = actual->atras;
+                    --indice;
+                    cursor = 0; 
+                }
+                break;
+            case Key::RIGHT:
+                if (actual->sig != nullptr) {
+                    actual = actual->sig;
+                    ++indice;
+                    cursor = 0;
+                }
+                break;
+            case Key::ENTER:
+                if (cursor >= 0 && cursor <= 3) {
+                    actual->info.s = cursor + 1;
+                    
+                } else if (cursor == 4) {
+                    // Finalizar
+                    goto finalizar_examen;
+                }
+                break;
+            default:
+                break;
         }
     }
 
+    finalizar_examen:
+    // Calcular puntuación
     int puntosLogrados = 0;
     nodo* recorrido = inicio;
     int preguntasContadas = 0;
@@ -560,7 +597,67 @@ void aplicarExamen() {
     cout << "Total preguntas: " << preguntasContadas << "\n";
     cout << "Puntos obtenidos: " << puntosLogrados << " / " << totalPuntos << "\n";
     cout << "Presiona cualquier tecla para volver al menu...";
-    getch();
+    _getch();
 
     liberarLista(inicio);
+}
+
+void dibujarMenuAplicacion(nodo* actual, int indice, int total, int cursor) {
+    limpiarPantalla();
+    cout << "==== APLICAR EXAMEN ====\n";
+    cout << "Reactivo " << indice << " de " << total << "\n";
+    cout << "Pregunta: " << actual->info.p << "\n\n";
+
+    const char* textos[] = {actual->info.op1, actual->info.op2,
+                            actual->info.op3, actual->info.op4};
+    for (int i = 0; i < 4; ++i) {
+        bool esRespuestaGuardada = (actual->info.s == i + 1);
+        bool esCursor = (cursor == i);
+
+        cout << (esRespuestaGuardada ? " * " : "   ");
+        if (esCursor) cout << "\033[7m";
+        cout << (i + 1) << ") " << textos[i] << "\033[0m\n";
+    }
+
+    bool esCursorFinal = (cursor == 4);
+    cout << "\n   ";
+    if (esCursorFinal) cout << "\033[7m";
+    cout << "FINALIZAR examen\033[0m\n";
+
+    cout << "\nUsa las flechas para moverte, Enter para seleccionar.\n";
+}
+
+void dibujarMenuModificacion(nodo* actual, int indice, int total, int seleccionMenu) {
+    limpiarPantalla();
+    cout << "==== EDITOR DE EXAMENES ====\n";
+    cout << "Reactivo " << indice << " de " << total << "\n";
+    cout << "Pregunta: " << actual->info.p << "\n\n";
+
+    cout << "1) " << actual->info.op1 << "\n";
+    cout << "2) " << actual->info.op2 << "\n";
+    cout << "3) " << actual->info.op3 << "\n";
+    cout << "4) " << actual->info.op4 << "\n\n";
+
+    cout << "Respuesta correcta: op" << actual->info.r << "\n";
+    cout << "Puntos: " << actual->info.puntos << "\n\n";
+
+    vector<string> acciones = {
+        "EDITAR esta pregunta",
+        "GUARDAR examen",
+        "Ir a la pregunta ANTERIOR",
+        "Ir a la pregunta SIGUIENTE",
+        "SALIR sin guardar"
+    };
+
+    for (int i = 0; i < (int)acciones.size(); ++i) {
+        if (i == seleccionMenu)
+            cout << "\033[7m > " << acciones[i] << " \033[0m\n";
+        else
+            cout << "   " << acciones[i] << "\n";
+    }
+    cout << "\nUsa las flechas para elegir accion, Enter para ejecutar.\n";
+}
+
+void limpiarPantalla() {
+    system("cls");
 }
