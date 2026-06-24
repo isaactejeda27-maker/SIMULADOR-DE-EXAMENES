@@ -5,14 +5,6 @@
 #include <cctype> //manejo de caracteres en la tabla ASCII
 #include <io.h> //archivos de bajo nivel, solo para windows
 
-//nombramiento de invocacion de los espacios de texto
-using std::cin;
-using std::getline;
-using std::ofstream;
-using std::ifstream;
-using std::stringstream;
-using std::to_string;
-
 //copiamos textos desde el archivo caracter por caracter, Mas seguro para el buffer
 static void copiarTexto(const string& src, char* dst, int maxTam) {
     int copiados = 0;
@@ -317,7 +309,6 @@ static bool cargarExamenDesdeArchivo(const string& ruta, nodo*& inicio, nodo*& f
 }
 
 // Guarda la lista de reactivos de vuelta en el archivo.
-// Complejidad: O(n) donde n es el numero de preguntas en memoria.
 static bool guardarExamenAArchivo(const string& ruta, nodo* inicio) {
     ofstream archivo(ruta);
     if (!archivo) return false;
@@ -338,19 +329,6 @@ static bool guardarExamenAArchivo(const string& ruta, nodo* inicio) {
     return true;
 }
 
-static void mostrarPreguntaParaEdicion(nodo* actual, int indice, int total) {
-    cout << "\033[2J\033[H";
-    cout << "==== EDITOR DE EXAMENES ====\n";
-    cout << "Reactivo " << indice << " de " << total << "\n";
-    cout << "Pregunta: " << actual->info.p << "\n";
-    cout << "1) " << actual->info.op1 << "\n";
-    cout << "2) " << actual->info.op2 << "\n";
-    cout << "3) " << actual->info.op3 << "\n";
-    cout << "4) " << actual->info.op4 << "\n";
-    cout << "Respuesta correcta: op" << actual->info.r << "\n";
-    cout << "Puntos: " << actual->info.puntos << "\n\n";
-    cout << "[Izq/Dch] moverse, E editar, G guardar, S salir\n";
-}
 
 static void editarPregunta(nodo* actual) {
     cout << "\033[2J\033[H";
@@ -495,21 +473,6 @@ void modificarExamen() {
     liberarLista(inicio);
 }
 
-static void mostrarPreguntaParaAplicacion(nodo* actual, int indice, int total) {
-    cout << "\033[2J\033[H";
-    cout << "==== APLICAR EXAMEN ====\n";
-    cout << "Reactivo " << indice << " de " << total << "\n";
-    cout << "Pregunta: " << actual->info.p << "\n";
-    cout << "1) " << actual->info.op1 << "\n";
-    cout << "2) " << actual->info.op2 << "\n";
-    cout << "3) " << actual->info.op3 << "\n";
-    cout << "4) " << actual->info.op4 << "\n";
-    cout << "Respuesta seleccionada: ";
-    if (actual->info.s == 0) cout << "(sin responder)\n";
-    else cout << "op" << actual->info.s << "\n";
-    cout << "Puntos de esta pregunta: " << actual->info.puntos << "\n\n";
-    cout << "[Izq/Dch] moverse, 1-4 responder, F finalizar prueba\n";
-}
 
 void aplicarExamen() {
     cout << "\033[2J\033[H";

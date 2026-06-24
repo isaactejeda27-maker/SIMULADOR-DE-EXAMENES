@@ -7,6 +7,13 @@
 #include <conio.h>
 #include <stdlib.h>
 
+//nombramiento de invocacion de los espacios de texto
+using std::cin;
+using std::getline;
+using std::ofstream;
+using std::ifstream;
+using std::stringstream;
+using std::to_string;
 using std::string;
 using std::vector;
 using std::cout;

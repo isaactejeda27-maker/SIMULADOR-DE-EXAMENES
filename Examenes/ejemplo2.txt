@@ -1,5 +1,3 @@
-:p;EXAMEN ejemplo2
-
 :p;Como se dice Hola en ingles?
 :op1;Hello
 :op2;hola
